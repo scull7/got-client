@@ -1,0 +1,40 @@
+{
+  "name": "got-client",
+  "version": "0.0.1",
+  "description": "A configurable HTTP client that uses the `got` library as its unerlying HTTP interface.",
+  "main": "dist/got-client.cjs.js",
+  "jsnext:main": "dist/got-client.es2016.js",
+  "repository": "git@github.com:scull7/got-client.git",
+  "author": "Nathan Sculli <scull7@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "flow": "flow; test $? -eq 0 -o $? -eq 2"
+  },
+  "babel": {
+    "presets": [ "env" ],
+    "plugins": [ "transform-flow-strip-types" ],
+    "ignore": "test/**/*",
+    "sourceMaps": "inline"
+  },
+  "ava": {
+    "require": [
+      "babel-core/register"
+    ]
+  },
+  "devDependencies": {
+    "ava": "^0.17.0",
+    "babel-plugin-transform-flow-strip-types": "^6.21.0",
+    "babel-preset-env": "^1.1.6",
+    "flow-bin": "^0.37.4",
+    "flow-type": "^1.0.1",
+    "flow-typed": "^2.0.0",
+    "nyc": "^10.0.0",
+    "rollup": "^0.41.1",
+    "rollup-plugin-flow": "^1.1.1",
+    "rollup-plugin-includepaths": "^0.1.8",
+    "rollup-plugin-json": "^2.1.0"
+  },
+  "dependencies": {
+    "ramda": "^0.21.0"
+  }
+}
