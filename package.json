@@ -11,8 +11,12 @@
     "flow": "flow; test $? -eq 0 -o $? -eq 2"
   },
   "babel": {
-    "presets": [ "env" ],
-    "plugins": [ "transform-flow-strip-types" ],
+    "presets": [
+      "env"
+    ],
+    "plugins": [
+      "transform-flow-strip-types"
+    ],
     "ignore": "test/**/*",
     "sourceMaps": "inline"
   },
@@ -35,6 +39,7 @@
     "rollup-plugin-json": "^2.1.0"
   },
   "dependencies": {
+    "got": "^6.7.1",
     "ramda": "^0.21.0"
   }
 }

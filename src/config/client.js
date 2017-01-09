@@ -3,6 +3,7 @@
 import type { Headers } from '../http'
 import type { Query } from '../url'
 import type { Config as UserConfig } from './user'
+
 import * as User from './user'
 
 type Path    = string
