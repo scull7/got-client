@@ -16,4 +16,7 @@ dist: clean
 test: 
 	${NODE_BIN}/ava
 
-.PHONY: install test
+flow:
+	${NODE_BIN}/flow
+
+.PHONY: install test flow
