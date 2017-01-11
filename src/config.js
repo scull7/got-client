@@ -24,7 +24,7 @@ export type Retry = (retry: number, error: any) => number
 
 export type Input =
   { url?            : string
-  , method          : Method
+  , method?         : Method
   , auth?           : Auth
   , is_json?        : boolean
   , timeout?        : ?TimeoutOpt
@@ -91,8 +91,13 @@ export function InputToLibraryOptions(i: Input): LibraryOptions {
 }
 
 
+function isNil(x: any): boolean {
+  return x === undefined || x === null
+}
+
+
 function __eitherProp(prop: string, x: Object, y: Object): any {
-  return y[prop] === undefined ? x[prop] : y[prop]
+  return isNil(y[prop]) ? x[prop] : y[prop]
 }
 
 
@@ -126,7 +131,7 @@ export function InputMerge(x: Input, y: Input): Input {
 
 
 function __InputReducer(x: Input, y: Input): Input {
-  return InputMerge(y, x)
+  return InputMerge(x, y)
 }
 
 

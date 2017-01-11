@@ -1,9 +1,10 @@
 /* @flow */
 
 import type { Input, LibraryOptions } from './config.js'
-import type { Headers, Query, Method } from './http'
+import type { Headers, Query, Method } from './http.js'
 
 import { InputMergeAll, InputToLibraryOptions } from './config.js'
+import { UrlJoin } from './http.js'
 
 
 type GotMethod = (url: string, options: Input) => Promise<Response>
@@ -27,7 +28,11 @@ function mcf(method: Method): Input {
 
 
 function __run(lib: any, url: string, ...i: Array<Input>): Promise<Response> {
-  return lib(url, InputToLibraryOptions( InputMergeAll.apply(null, i) ))
+
+  const options = InputToLibraryOptions( InputMergeAll.apply(null, i) )
+
+  return lib( UrlJoin(options.url, url), options)
+
 }
 
 

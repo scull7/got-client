@@ -1,6 +1,7 @@
 
-import querystring as QS from 'querystring'
+import * as QS from 'querystring'
 import { posix as Path } from 'path'
+import * as URL from 'url'
 
 export type Headers = { [ key: string ]: string }
 
@@ -17,9 +18,30 @@ export type Method  =
   | "DELETE"
 
 
+export type Url =
+  { href: string
+  , protocol: ?string
+  , slashes: ?boolean
+  , host: ?string
+  , auth: ?string
+  , hostname: ?string
+  , port: ?string
+  , pathname: ?string
+  , search: ?string
+  , path: ?string
+  , query: ?string | Query
+  , hash: ?string
+  }
+
+
+function isNil(x: any): boolean {
+  return x === undefined || x === null
+}
+
+
 export function Merge<T>(x: T, y: T): T {
-  if (x === undefined) return y;
-  if (y === undefined) return x;
+  if (isNil(x)) return y
+  if (isNil(y)) return x
 
   if (typeof x === 'string') x = QS.parse(x)
   if (typeof y === 'string') y = QS.parse(y)
@@ -28,9 +50,41 @@ export function Merge<T>(x: T, y: T): T {
 }
 
 
-export function UrlJoin(x: string, y: string) : string {
-  if (x === undefined) return y;
-  if (y === undefined) return x;
+function __eitherProp(p: string, x: T, y: T): any {
+  return isNil(x[p]) ? y[p] : x[p]
+}
+
+
+function PathJoin(x: ?string, y: ?string) : ?string {
+  if ( isNil(x) ) return y
+  if ( isNil(y) ) return x
 
   return Path.join(x, y)
+}
+
+
+export function UrlJoin(x: string, y: string) : string {
+  if ( isNil(x) ) return y
+  if ( isNil(y) ) return x
+
+  const y_url: Url = URL.parse(y)
+
+  if (y_url.protocol) return y
+
+  const x_url: Url = URL.parse(x)
+
+  const z_url = Object.assign(x_url, {
+    hostname: __eitherProp('hostname', y_url, x_url)
+  , pathname: PathJoin(x_url.pathname, y_url.pathname)
+  , query: Merge(x_url.query, y_url.query)
+  , hash: __eitherProp('hash', y_url, x_url)
+  
+  // The following properties are nullified because they will
+  // override any merge attempts if they have a value.
+  , href: undefined
+  , path: undefined
+  , search: undefined
+  })
+
+  return URL.format(z_url)
 }
