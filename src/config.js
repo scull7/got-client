@@ -3,6 +3,7 @@
 import type { Headers, Query, Body, Method } from './http'
 
 import { Merge, UrlJoin } from './http'
+import { isNil, propEither } from './lib.js'
 
 
 export type Auth =
@@ -76,7 +77,7 @@ export function InputToLibraryOptions(i: Input): LibraryOptions {
 
   return {
     url            : i.url
-  , method         : i.method
+  , method         : i.method || "GET"
   , headers        : i.headers
   , query          : i.query
   , body           : i.body
@@ -88,16 +89,6 @@ export function InputToLibraryOptions(i: Input): LibraryOptions {
   , followRedirect : i.followRedirect
   }
 
-}
-
-
-function isNil(x: any): boolean {
-  return x === undefined || x === null
-}
-
-
-function __eitherProp(prop: string, x: Object, y: Object): any {
-  return isNil(y[prop]) ? x[prop] : y[prop]
 }
 
 
@@ -116,16 +107,16 @@ export function InputMerge(x: Input, y: Input): Input {
 
   return {
     url: UrlJoin(x.url, y.url)
-  , method: __eitherProp('method', x, y)
+  , method: propEither('method', x, y)
   , headers: Object.assign({}, x.headers, y.headers)
   , query: Merge(x.query, y.query)
   , body: Merge(x.body, y.body)
-  , auth: __eitherProp('auth', x, y)
-  , is_json: __eitherProp('is_json', x, y)
-  , encoding: __eitherProp('encoding', x, y)
+  , auth: propEither('auth', x, y)
+  , is_json: propEither('is_json', x, y)
+  , encoding: propEither('encoding', x, y)
   , timeout: __mergeTimeoutOpt(x.timeout, y.timeout)
-  , retries: __eitherProp('retries', x, y)
-  , followRedirect: __eitherProp('followRedirect', x, y)
+  , retries: propEither('retries', x, y)
+  , followRedirect: propEither('followRedirect', x, y)
   }
 }
 

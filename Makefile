@@ -5,7 +5,7 @@ install:
 	yarn install
 
 clean:
-	rm dist/*
+	rm -f ./dist/*
 
 build:
 	${NODE_BIN}/rollup -c
@@ -19,4 +19,4 @@ test:
 flow:
 	${NODE_BIN}/flow
 
-.PHONY: install test flow
+.PHONY: install test flow build clean

@@ -1,12 +1,17 @@
 import includePaths from 'rollup-plugin-includepaths'
-import flow from 'rollup-plugin-flow'
+import RollupBabel from './build-lib/rollup-babel-plugin.js'
 
 const pluginIncludePaths = includePaths({
   paths: [ 'src' ]
 , extensions: [ '.js', '.json' ]
 })
 
-const pluginFlow = flow({ pretty: true })
+
+const pluginBabel = RollupBabel({
+  exclude: 'node_modules/**'
+, plugins: [ 'transform-flow-strip-types' ]
+})
+
 
 const pkg      = require('./package.json')
 const external = Object.keys(pkg.dependencies);
@@ -18,7 +23,7 @@ export default {
   entry: 'src/main.js'
 , plugins: [
     pluginIncludePaths
-  , pluginFlow
+  , pluginBabel
   ]
 , external: external
 , targets: [

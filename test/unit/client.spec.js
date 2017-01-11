@@ -49,7 +49,7 @@ test.cb('Client should have the post convenience method', t => {
   , options: {}
   , fake_lib: (url, options) => {
 
-      t.is(url, 'http://test.com/is-post')
+      t.is(url, 'http://test.com/is-post?buzz=baz')
       t.is(options.method, 'POST')
       t.end()
 

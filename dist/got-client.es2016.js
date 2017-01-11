@@ -1,88 +1,174 @@
-/*  */
+import { parse } from 'querystring';
+import * as QS from 'querystring';
+import { posix } from 'path';
+import { format, parse as parse$1 } from 'url';
+import * as URL from 'url';
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function authToString(a) {
-  return a.user + ':' + a.password
+function isNil(x) {
+  return x === undefined || x === null;
 }
 
-
-function propOr(p, d, u) {
-  return u[p] == null ? d : u[p]
+function propEither(prop, x, y) {
+  return isNil(y[prop]) ? x[prop] : y[prop];
 }
 
-/*  */
+function Merge(x, y) {
+  if (isNil(x)) x = {};
+  if (isNil(y)) y = {};
 
+  if (typeof x === 'string') x = parse(x);
+  if (typeof y === 'string') y = parse(y);
 
+  if (typeof x !== 'object' || typeof y !== 'object') throw new TypeError('Invalid merge parameter.');
 
+  return Object.assign({}, x, y);
+}
 
-const DEFAULT_OPTION_BASE_URL   = '/';
-const DEFAULT_OPTION_JSON      = true;
-const DEFAULT_OPTION_RETRY      = 0;
-const DEFAULT_OPTION_REDIRECT  = true;
-const DEFAULT_OPTION_ENCODING   = 'utf8';
-const DEFAULT_OPTION_HEADERS   = {};
-const DEFAULT_OPTION_TIMEOUT   = {
-  connection : 120000 // 2 minutes
-, socket     : 30000 // 30 seconds
+function PathJoin(x, y) {
+
+  if (typeof x !== 'string') x = '';
+  if (typeof y !== 'string') y = '';
+
+  return posix.join(x, y);
+}
+
+function UrlJoin(x, y) {
+  if (x === null || x === undefined) x = '';
+  if (y === null || y === undefined) y = '';
+
+  const y_url = parse$1(y);
+
+  if (y_url.protocol) return y;
+
+  const x_url = parse$1(x);
+
+  const z_url = Object.assign(x_url, {
+    hostname: propEither('hostname', x_url, y_url),
+    pathname: PathJoin(x_url.pathname, y_url.pathname),
+    query: Merge(x_url.query, y_url.query),
+    hash: propEither('hash', x_url, y_url)
+
+    // The following properties are nullified because they will
+    // override any merge attempts if they have a value.
+    , href: undefined,
+    path: undefined,
+    search: undefined
+  });
+
+  return format(z_url);
+}
+
+const DEFAULT_INPUT = {
+  url: undefined,
+  method: "GET",
+  headers: {},
+  query: {},
+  body: {},
+  auth: undefined,
+  is_json: false,
+  encoding: "utf8",
+  timeout: undefined,
+  retries: undefined,
+  followRedirect: undefined
 };
 
-
-function getAuth(u) {
-  return u.auth == null ? '' : authToString(u.auth)
+function AuthToString(a) {
+  return `${ a.user }:${ a.password }`;
 }
 
-
-function timeoutPropOr(p, d, u) {
-  return u.timeout == null ? d : (u.timeout[p] == null ? d : u.timeout[p])
-}
-
-
-function getTimeout(u) {
-  const CONNECTION = DEFAULT_OPTION_TIMEOUT.connection;
-  const SOCKET = DEFAULT_OPTION_TIMEOUT.socket;
-  
-  return {
-    connection: timeoutPropOr('connection', CONNECTION, u)
-  , socket: timeoutPropOr('socket', SOCKET, u)
-  }
-}
-
-
-
-
-
-function Factory(u)  {
+function InputToLibraryOptions(i) {
 
   return {
-    base_url       : propOr('base_url', DEFAULT_OPTION_BASE_URL, u)
-  , auth           : getAuth(u)
-  , json           : propOr('is_json', DEFAULT_OPTION_JSON, u)
-  , timeout        : getTimeout(u)
-  , retry          : propOr('retry', DEFAULT_OPTION_RETRY, u)
-  , encoding       : propOr('encoding', DEFAULT_OPTION_ENCODING, u)
-  , headers        : propOr('headers', DEFAULT_OPTION_HEADERS, u)
-  , query          : propOr('query', DEFAULT_OPTION_HEADERS, u)
-  , followRedirect : propOr('followRedirect', DEFAULT_OPTION_REDIRECT, u)
-  }
-
+    url: i.url,
+    method: i.method || "GET",
+    headers: i.headers,
+    query: i.query,
+    body: i.body,
+    auth: i.auth ? AuthToString(i.auth) : undefined,
+    is_json: i.is_json,
+    encoding: i.encoding,
+    timeout: i.timeout,
+    retries: i.retries,
+    followRedirect: i.followRedirect
+  };
 }
 
-/*  */
+function __mergeTimeoutOpt(x, y) {
+  if (x === undefined) return y;
+  if (y === undefined) return x;
 
+  if (typeof x === 'object' && typeof y === 'object') return Object.assign({}, x, y);
 
-const client_config  = Factory({});
-console.log(client_config);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZ290LWNsaWVudC5lczIwMTYuanMiLCJzb3VyY2VzIjpbIi4uL3NyYy9jb25maWcvdXNlci5qcyIsIi4uL3NyYy9jb25maWcvY2xpZW50LmpzIl0sInNvdXJjZXNDb250ZW50IjpbIi8qIEBmbG93ICovXG5pbXBvcnQgdHlwZSB7IEhlYWRlcnMgfSBmcm9tICcuLi9odHRwJ1xuaW1wb3J0IHR5cGUgeyBRdWVyeSB9IGZyb20gJy4uL3VybCdcblxudHlwZSBBdXRoID1cbiAgeyB1c2VyICAgICA6IHN0cmluZ1xuICAsIHBhc3N3b3JkIDogc3RyaW5nXG4gIH1cblxudHlwZSBUaW1lb3V0ID1cbiAgeyBjb25uZWN0aW9uIDogP251bWJlclxuICAsIHNvY2tldCAgICAgOiA/bnVtYmVyXG4gIH1cblxuXG50eXBlIFJldHJ5Rm4gICAgICAgICAgID0gKHJldHJ5OiBudW1iZXIsIGVycm9yOiBhbnkpID0+IG51bWJlclxudHlwZSBSZXRyeSAgICAgICAgICAgICA9IG51bWJlciB8IFJldHJ5Rm5cblxuXG5leHBvcnQgdHlwZSBDb25maWcgPVxuICB7IGJhc2VfdXJsPyAgICAgICA6IHN0cmluZ1xuICAsIGF1dGg/ICAgICAgICAgICA6IEF1dGhcbiAgLCBpc19qc29uPyAgICAgICAgOiBib29sZWFuXG4gICwgdGltZW91dD8gICAgICAgIDogVGltZW91dFxuICAsIHJldHJ5PyAgICAgICAgICA6IFJldHJ5XG4gICwgZW5jb2Rpbmc/ICAgICAgIDogc3RyaW5nXG4gICwgaGVhZGVycz8gICAgICAgIDogSGVhZGVyc1xuICAsIHF1ZXJ5PyAgICAgICAgICA6IFF1ZXJ5XG4gICwgZm9sbG93UmVkaXJlY3Q/IDogYm9vbGVhblxuICB9XG5cblxuZXhwb3J0IGZ1bmN0aW9uIGF1dGhUb1N0cmluZyhhOiBBdXRoKTogc3RyaW5nIHtcbiAgcmV0dXJuIGEudXNlciArICc6JyArIGEucGFzc3dvcmRcbn1cblxuXG5leHBvcnQgZnVuY3Rpb24gcHJvcE9yPFQ+KHA6IHN0cmluZywgZDogVCwgdTogQ29uZmlnKTogVCB7XG4gIHJldHVybiB1W3BdID09IG51bGwgPyBkIDogdVtwXVxufVxuIiwiLyogQGZsb3cgKi9cblxuaW1wb3J0IHR5cGUgeyBIZWFkZXJzIH0gZnJvbSAnLi4vaHR0cCdcbmltcG9ydCB0eXBlIHsgUXVlcnkgfSBmcm9tICcuLi91cmwnXG5pbXBvcnQgdHlwZSB7IENvbmZpZyBhcyBVc2VyQ29uZmlnIH0gZnJvbSAnLi91c2VyJ1xuaW1wb3J0ICogYXMgVXNlciBmcm9tICcuL3VzZXInXG5cbnR5cGUgUGF0aCAgICA9IHN0cmluZ1xudHlwZSBSZXRyeUZuID0gKHJldHJ5OiBudW1iZXIsIGFueSkgPT4gbnVtYmVyXG50eXBlIFJldHJ5ICAgPSBudW1iZXIgfCBSZXRyeUZuXG50eXBlIFRpbWVvdXQgPSB7XG4gIGNvbm5lY3Rpb24gOiBudW1iZXJcbiwgc29ja2V0ICAgICA6IG51bWJlclxufVxuXG5cbmNvbnN0IERFRkFVTFRfT1BUSU9OX0JBU0VfVVJMIDogc3RyaW5nICA9ICcvJ1xuY29uc3QgREVGQVVMVF9PUFRJT05fSlNPTiAgICAgOiBib29sZWFuID0gdHJ1ZVxuY29uc3QgREVGQVVMVF9PUFRJT05fUkVUUlkgICAgOiBudW1iZXIgID0gMFxuY29uc3QgREVGQVVMVF9PUFRJT05fUkVESVJFQ1QgOiBib29sZWFuID0gdHJ1ZVxuY29uc3QgREVGQVVMVF9PUFRJT05fRU5DT0RJTkcgOiBzdHJpbmcgID0gJ3V0ZjgnXG5jb25zdCBERUZBVUxUX09QVElPTl9IRUFERVJTICA6IEhlYWRlcnMgPSB7fVxuY29uc3QgREVGQVVMVF9PUFRJT05fUVVFUlkgICAgOiBRdWVyeSAgID0ge31cbmNvbnN0IERFRkFVTFRfT1BUSU9OX1RJTUVPVVQgIDogVGltZW91dCA9IHtcbiAgY29ubmVjdGlvbiA6IDEyMDAwMCAvLyAyIG1pbnV0ZXNcbiwgc29ja2V0ICAgICA6IDMwMDAwIC8vIDMwIHNlY29uZHNcbn1cblxuXG5mdW5jdGlvbiBnZXRBdXRoKHU6IFVzZXJDb25maWcpOiBzdHJpbmcge1xuICByZXR1cm4gdS5hdXRoID09IG51bGwgPyAnJyA6IFVzZXIuYXV0aFRvU3RyaW5nKHUuYXV0aClcbn1cblxuXG5mdW5jdGlvbiB0aW1lb3V0UHJvcE9yKHA6IHN0cmluZywgZDogbnVtYmVyLCB1OiBVc2VyQ29uZmlnKTogbnVtYmVyIHtcbiAgcmV0dXJuIHUudGltZW91dCA9PSBudWxsID8gZCA6ICh1LnRpbWVvdXRbcF0gPT0gbnVsbCA/IGQgOiB1LnRpbWVvdXRbcF0pXG59XG5cblxuZnVuY3Rpb24gZ2V0VGltZW91dCh1OiBVc2VyQ29uZmlnKTogVGltZW91dCB7XG4gIGNvbnN0IENPTk5FQ1RJT04gPSBERUZBVUxUX09QVElPTl9USU1FT1VULmNvbm5lY3Rpb25cbiAgY29uc3QgU09DS0VUID0gREVGQVVMVF9PUFRJT05fVElNRU9VVC5zb2NrZXRcbiAgXG4gIHJldHVybiB7XG4gICAgY29ubmVjdGlvbjogdGltZW91dFByb3BPcignY29ubmVjdGlvbicsIENPTk5FQ1RJT04sIHUpXG4gICwgc29ja2V0OiB0aW1lb3V0UHJvcE9yKCdzb2NrZXQnLCBTT0NLRVQsIHUpXG4gIH1cbn1cblxuXG5leHBvcnQgdHlwZSBDb25maWcgPSB7XG4gIGJhc2VfdXJsICAgICAgIDogc3RyaW5nXG4sIGF1dGggICAgICAgICAgIDogc3RyaW5nXG4sIGpzb24gICAgICAgICAgIDogYm9vbGVhblxuLCB0aW1lb3V0ICAgICAgICA6IFRpbWVvdXRcbiwgcmV0cnkgICAgICAgICAgOiBSZXRyeVxuLCBlbmNvZGluZyAgICAgICA6IHN0cmluZ1xuLCBoZWFkZXJzICAgICAgICA6IEhlYWRlcnNcbiwgZm9sbG93UmVkaXJlY3QgOiBib29sZWFuXG59XG5cblxuZXhwb3J0IGZ1bmN0aW9uIEZhY3RvcnkodTogVXNlckNvbmZpZykgOiBDb25maWcge1xuXG4gIHJldHVybiB7XG4gICAgYmFzZV91cmwgICAgICAgOiBVc2VyLnByb3BPcignYmFzZV91cmwnLCBERUZBVUxUX09QVElPTl9CQVNFX1VSTCwgdSlcbiAgLCBhdXRoICAgICAgICAgICA6IGdldEF1dGgodSlcbiAgLCBqc29uICAgICAgICAgICA6IFVzZXIucHJvcE9yKCdpc19qc29uJywgREVGQVVMVF9PUFRJT05fSlNPTiwgdSlcbiAgLCB0aW1lb3V0ICAgICAgICA6IGdldFRpbWVvdXQodSlcbiAgLCByZXRyeSAgICAgICAgICA6IFVzZXIucHJvcE9yKCdyZXRyeScsIERFRkFVTFRfT1BUSU9OX1JFVFJZLCB1KVxuICAsIGVuY29kaW5nICAgICAgIDogVXNlci5wcm9wT3IoJ2VuY29kaW5nJywgREVGQVVMVF9PUFRJT05fRU5DT0RJTkcsIHUpXG4gICwgaGVhZGVycyAgICAgICAgOiBVc2VyLnByb3BPcignaGVhZGVycycsIERFRkFVTFRfT1BUSU9OX0hFQURFUlMsIHUpXG4gICwgcXVlcnkgICAgICAgICAgOiBVc2VyLnByb3BPcigncXVlcnknLCBERUZBVUxUX09QVElPTl9IRUFERVJTLCB1KVxuICAsIGZvbGxvd1JlZGlyZWN0IDogVXNlci5wcm9wT3IoJ2ZvbGxvd1JlZGlyZWN0JywgREVGQVVMVF9PUFRJT05fUkVESVJFQ1QsIHUpXG4gIH1cblxufVxuIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7Ozs7Ozs7dUJBZ0M4Qjs7Ozs7ZUFLUixFQUFLLEdBQVcsR0FBTTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7O2tCQ1IxQjs7Ozs7d0JBS00sR0FBVyxHQUFXOzs7OztxQkFLekI7Ozs7Ozs7Ozs7Ozs7O2tCQXVCSTs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7In0=
+  return y;
+}
+
+function InputMerge(x, y) {
+
+  return {
+    url: UrlJoin(x.url, y.url),
+    method: propEither('method', x, y),
+    headers: Object.assign({}, x.headers, y.headers),
+    query: Merge(x.query, y.query),
+    body: Merge(x.body, y.body),
+    auth: propEither('auth', x, y),
+    is_json: propEither('is_json', x, y),
+    encoding: propEither('encoding', x, y),
+    timeout: __mergeTimeoutOpt(x.timeout, y.timeout),
+    retries: propEither('retries', x, y),
+    followRedirect: propEither('followRedirect', x, y)
+  };
+}
+
+function __InputReducer(x, y) {
+  return InputMerge(x, y);
+}
+
+function InputMergeAll(...args) {
+  return args.reduce(__InputReducer, DEFAULT_INPUT);
+}
+
+// method configuration factory
+function mcf(method) {
+  return { method: method };
+}
+
+function __run(lib, url, ...i) {
+
+  const options = InputToLibraryOptions(InputMergeAll.apply(null, i));
+
+  return lib(UrlJoin(options.url, url), options);
+}
+
+function methodFactory(lib, c, m) {
+
+  return function client(url, options) {
+    return __run(lib, url, c, m, options);
+  };
+}
+
+function Factory(lib, c) {
+
+  function client(url, options) {
+
+    return __run(lib, url, c, options);
+  }
+  client.get = methodFactory(lib, c, mcf("GET"));
+  client.post = methodFactory(lib, c, mcf("POST"));
+  client.put = methodFactory(lib, c, mcf("PUT"));
+  client.patch = methodFactory(lib, c, mcf("PATCH"));
+  client.head = methodFactory(lib, c, mcf("HEAD"));
+  client.delete = methodFactory(lib, c, mcf("DELETE"));
+
+  return client;
+}
+
+// Marking lib as any so that we can make testing a bit easier. This
+// allows us to just send in any object and hope that it supplies
+// the proper interface.  Since we're just using `got` in the
+// default (and probably only) case this should be fine.
+function GotClient(u, lib) {
+
+  return Factory(lib || got, u);
+}
+
+export default GotClient;
