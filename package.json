@@ -8,7 +8,9 @@
   "author": "Nathan Sculli <scull7@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "flow": "flow; test $? -eq 0 -o $? -eq 2"
+    "test": "make test",
+    "flow": "make flow",
+    "prepare": "make dist"
   },
   "babel": {
     "presets": [
