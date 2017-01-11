@@ -40,7 +40,6 @@
     "rollup-pluginutils": "^2.0.1"
   },
   "dependencies": {
-    "got": "^6.7.1",
-    "ramda": "^0.21.0"
+    "got": "^6.7.1"
   }
 }
