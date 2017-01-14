@@ -1,6 +1,6 @@
 {
   "name": "got-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A configurable HTTP client that uses the `got` library as its unerlying HTTP interface.",
   "main": "dist/got-client.cjs.js",
   "jsnext:main": "dist/got-client.es2016.js",
