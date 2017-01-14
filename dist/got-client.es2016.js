@@ -104,6 +104,9 @@ function __mergeTimeoutOpt(x, y) {
 
 function InputMerge(x, y) {
 
+  if (!x) return y;
+  if (!y) return x;
+
   return {
     url: UrlJoin(x.url, y.url),
     method: propEither('method', x, y),
