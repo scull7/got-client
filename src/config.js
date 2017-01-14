@@ -105,6 +105,9 @@ function __mergeTimeoutOpt(x: ?TimeoutOpt, y: ?TimeoutOpt) : ?TimeoutOpt {
 
 export function InputMerge(x: Input, y: Input): Input {
 
+  if (!x) return y
+  if (!y) return x
+
   return {
     url: UrlJoin(x.url, y.url)
   , method: propEither('method', x, y)
